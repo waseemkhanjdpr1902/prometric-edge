@@ -1,20 +1,21 @@
 "use client";
 import { useEffect,useMemo,useState } from "react";
 import { ArrowLeft,ArrowRight,Bookmark,CheckCircle2,Clock3,RotateCcw,Target,Trophy,XCircle } from "lucide-react";
-import { Profession,questions } from "@/lib/exams";
+import { Profession,Question,questions } from "@/lib/exams";
 
 type Mode="practice"|"mock";
 type Saved={attempts:number;best:number;answered:number};
 
 export function ExamApp({profession}:{profession:Profession}){
- const bank=useMemo(()=>questions.filter(q=>q.profession===profession),[profession]);
+ const [customQuestions,setCustomQuestions]=useState<Question[]>([]);
+ const bank=useMemo(()=>[...questions,...customQuestions].filter(q=>q.profession===profession),[profession,customQuestions]);
  const topics=useMemo(()=>["All topics",...Array.from(new Set(bank.map(q=>q.topic)))],[bank]);
  const [started,setStarted]=useState(false),[mode,setMode]=useState<Mode>("practice"),[topic,setTopic]=useState("All topics"),[count,setCount]=useState(10);
  const [session,setSession]=useState(bank.slice(0,10)),[index,setIndex]=useState(0),[answers,setAnswers]=useState<Record<string,number>>({}),[submitted,setSubmitted]=useState(false),[seconds,setSeconds]=useState(600),[bookmarks,setBookmarks]=useState<string[]>([]),[saved,setSaved]=useState<Saved>({attempts:0,best:0,answered:0});
  const current=session[index],selected=current?answers[current.id]:undefined;
  const storageKey=`prometric-edge-${profession}`;
 
- useEffect(()=>{const raw=localStorage.getItem(storageKey);if(raw)try{setSaved(JSON.parse(raw))}catch{}const marks=localStorage.getItem(`${storageKey}-bookmarks`);if(marks)try{setBookmarks(JSON.parse(marks))}catch{}},[storageKey]);
+ useEffect(()=>{const raw=localStorage.getItem(storageKey);if(raw)try{setSaved(JSON.parse(raw))}catch{}const marks=localStorage.getItem(`${storageKey}-bookmarks`);if(marks)try{setBookmarks(JSON.parse(marks))}catch{}const imported=localStorage.getItem("prometric-edge-custom-questions");if(imported)try{setCustomQuestions(JSON.parse(imported))}catch{}},[storageKey]);
  useEffect(()=>{if(!started||submitted||mode!=="mock")return;const timer=setInterval(()=>setSeconds(s=>{if(s<=1){clearInterval(timer);setSubmitted(true);return 0}return s-1}),1000);return()=>clearInterval(timer)},[started,submitted,mode]);
  useEffect(()=>{if(!submitted)return;const correct=session.filter(q=>answers[q.id]===q.answer).length,score=Math.round(correct/session.length*100);const next={attempts:saved.attempts+1,best:Math.max(saved.best,score),answered:saved.answered+session.length};setSaved(next);localStorage.setItem(storageKey,JSON.stringify(next));},[submitted]); // eslint-disable-line react-hooks/exhaustive-deps
 
