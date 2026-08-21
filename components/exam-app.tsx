@@ -1,54 +1,31 @@
 "use client";
+import { useEffect,useMemo,useState } from "react";
+import { ArrowLeft,ArrowRight,Bookmark,CheckCircle2,Clock3,RotateCcw,Target,Trophy,XCircle } from "lucide-react";
+import { Profession,questions } from "@/lib/exams";
 
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, RotateCcw, XCircle } from "lucide-react";
-import { questions } from "@/lib/exams";
+type Mode="practice"|"mock";
+type Saved={attempts:number;best:number;answered:number};
 
-export function ExamApp({ profession }: { profession: "pharmacist" | "nurse" }) {
-  const bank = useMemo(() => questions.filter((q) => q.profession === profession), [profession]);
-  const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [submitted, setSubmitted] = useState(false);
-  const current = bank[index];
-  const selected = answers[current.id];
+export function ExamApp({profession}:{profession:Profession}){
+ const bank=useMemo(()=>questions.filter(q=>q.profession===profession),[profession]);
+ const topics=useMemo(()=>["All topics",...Array.from(new Set(bank.map(q=>q.topic)))],[bank]);
+ const [started,setStarted]=useState(false),[mode,setMode]=useState<Mode>("practice"),[topic,setTopic]=useState("All topics"),[count,setCount]=useState(10);
+ const [session,setSession]=useState(bank.slice(0,10)),[index,setIndex]=useState(0),[answers,setAnswers]=useState<Record<string,number>>({}),[submitted,setSubmitted]=useState(false),[seconds,setSeconds]=useState(600),[bookmarks,setBookmarks]=useState<string[]>([]),[saved,setSaved]=useState<Saved>({attempts:0,best:0,answered:0});
+ const current=session[index],selected=current?answers[current.id]:undefined;
+ const storageKey=`prometric-edge-${profession}`;
 
-  if (submitted) {
-    const correct = bank.filter((q) => answers[q.id] === q.answer).length;
-    const score = Math.round((correct / bank.length) * 100);
-    return (
-      <section className="result-card">
-        <div className="score-ring" style={{ "--score": `${score * 3.6}deg` } as React.CSSProperties}><span>{score}%</span></div>
-        <p className="eyebrow">Practice test complete</p>
-        <h1>{score >= 70 ? "Strong start." : "Keep building your edge."}</h1>
-        <p>You answered {correct} of {bank.length} questions correctly. Review the explanations, then try again.</p>
-        <div className="result-stats"><span><b>{correct}</b> Correct</span><span><b>{bank.length - correct}</b> Review</span><span><b>{Math.max(0, 70 - score)}%</b> To target</span></div>
-        <button className="primary-button" onClick={() => { setAnswers({}); setIndex(0); setSubmitted(false); }}><RotateCcw size={18} /> Retake practice</button>
-      </section>
-    );
-  }
+ useEffect(()=>{const raw=localStorage.getItem(storageKey);if(raw)try{setSaved(JSON.parse(raw))}catch{}const marks=localStorage.getItem(`${storageKey}-bookmarks`);if(marks)try{setBookmarks(JSON.parse(marks))}catch{}},[storageKey]);
+ useEffect(()=>{if(!started||submitted||mode!=="mock")return;const timer=setInterval(()=>setSeconds(s=>{if(s<=1){clearInterval(timer);setSubmitted(true);return 0}return s-1}),1000);return()=>clearInterval(timer)},[started,submitted,mode]);
+ useEffect(()=>{if(!submitted)return;const correct=session.filter(q=>answers[q.id]===q.answer).length,score=Math.round(correct/session.length*100);const next={attempts:saved.attempts+1,best:Math.max(saved.best,score),answered:saved.answered+session.length};setSaved(next);localStorage.setItem(storageKey,JSON.stringify(next));},[submitted]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
-    <section className="quiz-shell">
-      <div className="quiz-topline">
-        <a href="/exams"><ArrowLeft size={18} /> Exit practice</a>
-        <span className="timer"><Clock3 size={17} /> Untimed practice</span>
-      </div>
-      <div className="progress"><span style={{ width: `${((index + 1) / bank.length) * 100}%` }} /></div>
-      <div className="question-meta"><span>{current.topic}</span><span>Question {index + 1} of {bank.length}</span></div>
-      <h1 className="question-stem">{current.stem}</h1>
-      <div className="options">
-        {current.options.map((option, optionIndex) => {
-          const chosen = selected === optionIndex;
-          const revealed = selected !== undefined;
-          const state = revealed && optionIndex === current.answer ? "correct" : revealed && chosen ? "incorrect" : chosen ? "selected" : "";
-          return <button key={option} className={`option ${state}`} disabled={revealed} onClick={() => setAnswers((a) => ({ ...a, [current.id]: optionIndex }))}><span>{String.fromCharCode(65 + optionIndex)}</span>{option}{state === "correct" && <CheckCircle2 size={20} />}{state === "incorrect" && <XCircle size={20} />}</button>;
-        })}
-      </div>
-      {selected !== undefined && <div className="explanation"><strong>Clinical explanation</strong><p>{current.explanation}</p></div>}
-      <div className="quiz-actions">
-        <button className="ghost-button" disabled={index === 0} onClick={() => setIndex((i) => i - 1)}><ArrowLeft size={18} /> Previous</button>
-        {index < bank.length - 1 ? <button className="primary-button" disabled={selected === undefined} onClick={() => setIndex((i) => i + 1)}>Next question <ArrowRight size={18} /></button> : <button className="primary-button" disabled={selected === undefined} onClick={() => setSubmitted(true)}>View result <ArrowRight size={18} /></button>}
-      </div>
-    </section>
-  );
+ function begin(){const filtered=topic==="All topics"?bank:bank.filter(q=>q.topic===topic);const shuffled=[...filtered].sort(()=>Math.random()-.5);const size=Math.min(count,shuffled.length);setSession(shuffled.slice(0,size));setSeconds(size*60);setIndex(0);setAnswers({});setSubmitted(false);setStarted(true)}
+ function toggleBookmark(){if(!current)return;const next=bookmarks.includes(current.id)?bookmarks.filter(id=>id!==current.id):[...bookmarks,current.id];setBookmarks(next);localStorage.setItem(`${storageKey}-bookmarks`,JSON.stringify(next))}
+ function finish(){if(mode==="mock"&&!confirm("Submit this mock test and view your result?"))return;setSubmitted(true)}
+
+ if(!started)return <section className="setup-card"><a className="back-link" href={`/exams/${profession}`}><ArrowLeft size={18}/> Back to track</a><span className="eyebrow">Build your session</span><h1>{profession==="pharmacist"?"Pharmacist":"Registered Nurse"} practice</h1><p>Choose a learning mode, topic and session length. Your best score and completed questions are saved on this device.</p><div className="saved-strip"><span><Trophy/>Best score <b>{saved.best}%</b></span><span><RotateCcw/>Attempts <b>{saved.attempts}</b></span><span><Target/>Questions completed <b>{saved.answered}</b></span></div><div className="setup-section"><label>Learning mode</label><div className="choice-grid"><button className={mode==="practice"?"active":""} onClick={()=>setMode("practice")}><b>Practice</b><span>Answer feedback and explanations immediately</span></button><button className={mode==="mock"?"active":""} onClick={()=>setMode("mock")}><b>Mock exam</b><span>Timed session with answers revealed at the end</span></button></div></div><div className="setup-row"><div><label>Topic</label><select value={topic} onChange={e=>setTopic(e.target.value)}>{topics.map(t=><option key={t}>{t}</option>)}</select></div><div><label>Number of questions</label><select value={count} onChange={e=>setCount(Number(e.target.value))}><option value={5}>Quick 5</option><option value={10}>Focused 10</option><option value={20}>Full starter bank</option></select></div></div><button className="primary-button setup-start" onClick={begin}>Start {mode==="mock"?"mock exam":"practice"}<ArrowRight size={18}/></button><small className="content-note">Educational preparation only. Verify clinical decisions against current local policy and authoritative references.</small></section>;
+
+ if(submitted){const correct=session.filter(q=>answers[q.id]===q.answer).length,score=Math.round(correct/session.length*100);const topicStats=Array.from(new Set(session.map(q=>q.topic))).map(t=>{const subset=session.filter(q=>q.topic===t),right=subset.filter(q=>answers[q.id]===q.answer).length;return{topic:t,score:Math.round(right/subset.length*100),right,total:subset.length}}).sort((a,b)=>a.score-b.score);return <section className="result-card wide-result"><div className="score-ring" style={{"--score":`${score*3.6}deg`} as React.CSSProperties}><span>{score}%</span></div><p className="eyebrow">Session complete</p><h1>{score>=70?"You reached the practice target.":"Your improvement plan is ready."}</h1><p>You answered {correct} of {session.length} correctly. Focus on the lowest-scoring topics before your next attempt.</p><div className="result-stats"><span><b>{correct}</b>Correct</span><span><b>{session.length-correct}</b>Review</span><span><b>{saved.best}%</b>Best</span></div><div className="topic-breakdown"><h3>Topic performance</h3>{topicStats.map(t=><div key={t.topic}><span>{t.topic}<small>{t.right}/{t.total} correct</small></span><div className="progress"><i style={{width:`${t.score}%`}}/></div><b>{t.score}%</b></div>)}</div><details className="answer-review"><summary>Review every answer</summary>{session.map((q,i)=>{const right=answers[q.id]===q.answer;return <article key={q.id} className={right?"review-correct":"review-wrong"}><b>{right?<CheckCircle2/>:<XCircle/>} {i+1}. {q.stem}</b><p>Your answer: {answers[q.id]===undefined?"Not answered":q.options[answers[q.id]]}</p><p>Correct answer: {q.options[q.answer]}</p><small>{q.explanation}</small></article>})}</details><div className="result-actions"><button className="ghost-button" onClick={()=>setStarted(false)}>Change session</button><button className="primary-button" onClick={begin}><RotateCcw size={18}/>Try another set</button></div></section>}
+
+ const revealed=mode==="practice"&&selected!==undefined;
+ return <section className="quiz-shell"><div className="quiz-topline"><button className="plain-link" onClick={()=>setStarted(false)}><ArrowLeft size={18}/>Exit</button><span className="timer"><Clock3 size={17}/>{mode==="mock"?`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`:"Practice mode"}</span></div><div className="progress"><span style={{width:`${(index+1)/session.length*100}%`}}/></div><div className="question-meta"><span>{current.topic}</span><span>Question {index+1} of {session.length}</span></div><div className="question-heading"><h1 className="question-stem">{current.stem}</h1><button className={`bookmark-button ${bookmarks.includes(current.id)?"marked":""}`} onClick={toggleBookmark} aria-label="Bookmark question"><Bookmark/></button></div><div className="options">{current.options.map((option,i)=>{const chosen=selected===i,state=revealed&&i===current.answer?"correct":revealed&&chosen?"incorrect":chosen?"selected":"";return <button key={option} className={`option ${state}`} disabled={revealed} onClick={()=>setAnswers(a=>({...a,[current.id]:i}))}><span>{String.fromCharCode(65+i)}</span>{option}{state==="correct"&&<CheckCircle2/>}{state==="incorrect"&&<XCircle/>}</button>})}</div>{revealed&&<div className="explanation"><strong>Clinical explanation</strong><p>{current.explanation}</p></div>}<div className="quiz-actions"><button className="ghost-button" disabled={index===0} onClick={()=>setIndex(i=>i-1)}><ArrowLeft size={18}/>Previous</button>{index<session.length-1?<button className="primary-button" disabled={mode==="practice"&&selected===undefined} onClick={()=>setIndex(i=>i+1)}>Next<ArrowRight size={18}/></button>:<button className="primary-button" disabled={mode==="practice"&&selected===undefined} onClick={finish}>Submit test<ArrowRight size={18}/></button>}</div>{mode==="mock"&&<div className="question-map">{session.map((q,i)=><button key={q.id} className={`${i===index?"current":""} ${answers[q.id]!==undefined?"answered":""}`} onClick={()=>setIndex(i)}>{i+1}</button>)}</div>}</section>
 }

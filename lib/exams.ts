@@ -1,59 +1,50 @@
-export type Question = {
-  id: string;
-  profession: "pharmacist" | "nurse";
-  topic: string;
-  stem: string;
-  options: string[];
-  answer: number;
-  explanation: string;
-};
-
-export const questions: Question[] = [
-  {
-    id: "pharm-001", profession: "pharmacist", topic: "Pharmacology",
-    stem: "Which counselling point is most important for a patient starting warfarin?",
-    options: ["Avoid all green vegetables", "Keep vitamin K intake consistent", "Take double doses after a missed dose", "Stop INR monitoring once stable"],
-    answer: 1,
-    explanation: "Warfarin response is affected by vitamin K. Patients should maintain a consistent intake rather than eliminate vitamin K foods, and continue INR monitoring.",
-  },
-  {
-    id: "pharm-002", profession: "pharmacist", topic: "Patient Safety",
-    stem: "A prescription contains a dose that appears ten times higher than usual. What should the pharmacist do first?",
-    options: ["Dispense as written", "Ask the patient to decide", "Hold dispensing and clarify with the prescriber", "Reduce the dose without informing anyone"],
-    answer: 2,
-    explanation: "A potentially unsafe dose requires verification with the prescriber before dispensing. The intervention should also be documented.",
-  },
-  {
-    id: "pharm-003", profession: "pharmacist", topic: "Calculations",
-    stem: "A 100 mL solution contains 500 mg of a medicine. What volume provides a 125 mg dose?",
-    options: ["10 mL", "20 mL", "25 mL", "50 mL"],
-    answer: 2,
-    explanation: "The concentration is 5 mg/mL. Therefore, 125 mg ÷ 5 mg/mL = 25 mL.",
-  },
-  {
-    id: "nurse-001", profession: "nurse", topic: "Adult Health",
-    stem: "Which finding in a patient with suspected sepsis requires the most immediate escalation?",
-    options: ["Temperature 38.1°C", "Respiratory rate 26/min with new confusion", "Heart rate 96/min", "Reduced appetite"],
-    answer: 1,
-    explanation: "Tachypnoea with altered mental status suggests organ dysfunction and requires urgent sepsis assessment and escalation.",
-  },
-  {
-    id: "nurse-002", profession: "nurse", topic: "Medication Safety",
-    stem: "Before administering insulin, which action best prevents a medication error?",
-    options: ["Ask another patient to identify the dose", "Verify the prescription, glucose result and patient identity", "Administer before checking the meal", "Document before administration"],
-    answer: 1,
-    explanation: "Safe insulin administration requires verification of the order, current glucose, correct patient, dose, timing and meal availability.",
-  },
-  {
-    id: "nurse-003", profession: "nurse", topic: "Infection Control",
-    stem: "After caring for a patient with suspected Clostridioides difficile, the nurse should perform hand hygiene using:",
-    options: ["Alcohol rub only", "Soap and water", "Sterile water only", "No hand hygiene if gloves were worn"],
-    answer: 1,
-    explanation: "Soap and water is preferred because mechanical washing helps remove C. difficile spores; gloves do not replace hand hygiene.",
-  },
+export type Profession = "pharmacist" | "nurse";
+export type Question = { id:string; profession:Profession; topic:string; stem:string; options:string[]; answer:number; explanation:string };
+type Row=[string,Profession,string,string,string[],number,string];
+const r:Row[]=[
+["p01","pharmacist","Pharmacology","Which counselling point is most important for a patient starting warfarin?",["Avoid all green vegetables","Keep vitamin K intake consistent","Double a missed dose","Stop INR monitoring once stable"],1,"Keep vitamin K intake consistent and continue INR monitoring."],
+["p02","pharmacist","Patient Safety","A prescription dose appears ten times higher than usual. What should the pharmacist do first?",["Dispense it","Ask the patient","Hold and clarify with the prescriber","Reduce it silently"],2,"A potentially unsafe dose must be verified before dispensing and the intervention documented."],
+["p03","pharmacist","Calculations","A 100 mL solution contains 500 mg. What volume provides 125 mg?",["10 mL","20 mL","25 mL","50 mL"],2,"The concentration is 5 mg/mL; 125 divided by 5 equals 25 mL."],
+["p04","pharmacist","Pharmacology","Which medicine commonly causes a persistent dry cough?",["Amlodipine","Lisinopril","Losartan","Hydrochlorothiazide"],1,"ACE inhibitors such as lisinopril can increase bradykinin and cause dry cough."],
+["p05","pharmacist","Pharmacology","A patient using sublingual nitroglycerin should seek urgent help when chest pain:",["Occurs after exercise","Persists according to the emergency action plan","Improves with rest","Occurs before food"],1,"Persistent ischaemic chest pain may represent acute coronary syndrome and requires emergency action."],
+["p06","pharmacist","Pharmacy Practice","What is the best response to a serious suspected adverse drug reaction?",["Ignore it","Assess urgency, refer and report appropriately","Stop every medicine forever","Wait for refill"],1,"Serious reactions require assessment, referral when indicated and pharmacovigilance reporting."],
+["p07","pharmacist","Infectious Diseases","Why should antibiotics not be supplied for an uncomplicated viral cold?",["They always cause allergy","They do not treat viruses and unnecessary use promotes resistance","They work only at night","They prevent vaccination"],1,"Antibiotics do not treat viral infections and unnecessary exposure promotes resistance and harm."],
+["p08","pharmacist","Patient Safety","Which pair has a dangerous interaction?",["Sildenafil and nitrates","Paracetamol and saline spray","Calcium carbonate and emollient","Oral rehydration salts and water"],0,"PDE-5 inhibitors combined with nitrates can cause profound hypotension."],
+["p09","pharmacist","Calculations","An infusion of 1,000 mL must run over 8 hours. What rate is required?",["100 mL/h","120 mL/h","125 mL/h","150 mL/h"],2,"1,000 divided by 8 equals 125 mL/hour."],
+["p10","pharmacist","Pharmacology","What is especially important to monitor with an aminoglycoside?",["Visual acuity only","Renal function and drug levels when indicated","Waist circumference","Skin hydration"],1,"Renal function and appropriate drug-level monitoring reduce nephrotoxicity and ototoxicity risk."],
+["p11","pharmacist","Pharmacy Practice","A patient cannot swallow an enteric-coated tablet. What is safest?",["Crush it","Check for a suitable alternative formulation","Use hot water","Skip treatment"],1,"Enteric-coated products should not be altered without checking a safe alternative."],
+["p12","pharmacist","Patient Safety","Which abbreviation should be avoided because it can cause a tenfold error?",["mg","mL","U for units","PO"],2,"U can be misread as a zero; write units in full."],
+["p13","pharmacist","Pharmacology","Which treatment should not usually be stopped abruptly after long-term use?",["Emollient","Systemic corticosteroid","Simple antacid","Saline drops"],1,"Long-term systemic corticosteroids suppress the adrenal axis and generally require supervised tapering."],
+["p14","pharmacist","Pharmacy Practice","What is the main purpose of medication reconciliation?",["Increase medicines","Create an accurate list and resolve discrepancies","Replace assessment","Avoid the patient"],1,"Reconciliation identifies omissions, duplication, dosing errors and unintended changes."],
+["p15","pharmacist","Calculations","A child is prescribed 10 mg/kg and weighs 18 kg. What is the dose?",["28 mg","80 mg","180 mg","280 mg"],2,"10 mg/kg multiplied by 18 kg equals 180 mg."],
+["p16","pharmacist","Pharmacology","Which class can mask adrenergic symptoms of hypoglycaemia?",["Beta blockers","Proton-pump inhibitors","Antacids","Topical antifungals"],0,"Beta blockers may blunt tremor and palpitations, though sweating can persist."],
+["p17","pharmacist","Patient Safety","A patient develops facial swelling and breathing difficulty after a medicine. What is the priority?",["Routine appointment","Activate emergency care","Recommend food","Let them sleep"],1,"Airway swelling and breathing difficulty may be anaphylaxis or angioedema."],
+["p18","pharmacist","Pharmacy Practice","How should refrigerated medicines be protected?",["Freeze them","Maintain the specified monitored cold chain","Store in sunlight","Remove monitoring"],1,"Cold-chain medicines must remain within the labelled range and excursions require assessment."],
+["p19","pharmacist","Pharmacology","Which finding raises concern for digoxin toxicity?",["Mild thirst","Nausea, visual disturbance and arrhythmia symptoms","Improved appetite","Dry skin"],1,"Gastrointestinal symptoms, visual changes and rhythm disturbance are recognized toxicity features."],
+["p20","pharmacist","Ethics & Law","A relative asks for a competent adult patient's medication record without consent. What should happen?",["Disclose it","Protect confidentiality unless consent or lawful basis permits","Post it publicly","Delete it"],1,"Patient information remains confidential without consent or another valid legal basis."],
+["n01","nurse","Adult Health","Which finding in suspected sepsis requires immediate escalation?",["Temperature 38.1°C","Respiratory rate 26/min with new confusion","Heart rate 96/min","Reduced appetite"],1,"Tachypnoea with altered mental status suggests organ dysfunction."],
+["n02","nurse","Medication Safety","Before administering insulin, which action best prevents an error?",["Ask another patient","Verify order, glucose and identity","Ignore meal timing","Document first"],1,"Verify the order, glucose, patient, dose, timing and meal availability."],
+["n03","nurse","Infection Control","After caring for suspected C. difficile, hand hygiene should use:",["Alcohol rub only","Soap and water","Sterile water","Nothing after gloves"],1,"Soap and water mechanically removes spores; gloves do not replace hand hygiene."],
+["n04","nurse","Adult Health","A patient suddenly develops facial droop and unilateral weakness. What is the priority?",["Offer food","Activate stroke pathway and record last-known-well","Let them sleep","Review tomorrow"],1,"Possible acute stroke requires rapid activation and accurate symptom timing."],
+["n05","nurse","Patient Safety","Before medication administration, identify the patient with:",["Room number","Two approved identifiers","Diagnosis","Relative's description"],1,"Two approved identifiers reduce wrong-patient errors."],
+["n06","nurse","Adult Health","Which position usually helps a conscious patient with acute breathing difficulty?",["Flat supine","Upright unless contraindicated","Trendelenburg","Unassessed prone"],1,"Upright positioning generally improves lung expansion while assessment continues."],
+["n07","nurse","Infection Control","What is the first action after a needlestick injury?",["Hide it","Wash and follow the exposure-reporting pathway","Squeeze aggressively","Wait for symptoms"],1,"Immediate washing, reporting and risk assessment enable timely post-exposure care."],
+["n08","nurse","Medication Safety","A medication order is unclear. What should the nurse do?",["Guess","Clarify before administration","Ask the patient to choose","Omit without documenting"],1,"Ambiguous orders must be clarified before administration."],
+["n09","nurse","Maternal & Child","A postpartum patient has heavy bleeding and a boggy uterus. What is the priority?",["Leave the patient","Call for help and begin the haemorrhage response","Give oral fluid only","Delay vital signs"],1,"Uterine atony with heavy bleeding is an obstetric emergency."],
+["n10","nurse","Adult Health","Which finding most strongly suggests hypoglycaemia?",["Warm dry skin","Sweating, tremor and altered behaviour","Ankle swelling","Back pain"],1,"Adrenergic and neuroglycopenic symptoms require immediate glucose assessment."],
+["n11","nurse","Patient Safety","What is best for a high-risk inpatient's fall prevention?",["Routine restraints","Individualised precautions with essentials in reach","Dark room","Unassisted walking"],1,"Fall prevention should be individualized and regularly reassessed."],
+["n12","nurse","Infection Control","When should gloves be changed?",["End of shift","Between patients and contaminated-to-clean tasks","Daily","Only if torn"],1,"Gloves can transfer organisms and require appropriate changes between tasks and patients."],
+["n13","nurse","Adult Health","An opioid-treated patient is difficult to wake with respirations of 7/min. What is priority?",["Give the next dose","Stop opioid, call urgently and support airway/breathing","Offer food","Leave after documenting"],1,"Severe sedation with respiratory depression is an emergency."],
+["n14","nurse","Leadership & Ethics","A competent patient refuses treatment after receiving information. What should the nurse do?",["Force it","Respect, assess understanding and inform the clinician","Get secret family consent","Remove the record"],1,"A capacitous patient may refuse; support informed choice and document appropriately."],
+["n15","nurse","Maternal & Child","Which newborn finding requires urgent assessment?",["Hiccups","Central cyanosis","Sleeping after feeding","Sneezing"],1,"Central cyanosis may indicate significant hypoxaemia."],
+["n16","nurse","Medication Safety","Which action is appropriate for a high-alert medication?",["Bypass checks","Follow independent verification and policy","Prepare unnamed doses","Use an unlabelled syringe"],1,"High-alert medicines require robust safeguards and policy-based verification."],
+["n17","nurse","Adult Health","Which electrolyte disturbance can cause dangerous arrhythmia and weakness?",["Mild sodium elevation","Significant potassium abnormality","Low chloride alone","High phosphate only"],1,"Both significant hypo- and hyperkalaemia can cause weakness and life-threatening rhythms."],
+["n18","nurse","Patient Safety","What is the purpose of SBAR?",["Replace records","Structure Situation, Background, Assessment and Recommendation","Avoid recommendations","Shorten names"],1,"SBAR structures critical communication and required action."],
+["n19","nurse","Infection Control","Which measure helps prevent catheter-associated urinary infection?",["Use for convenience","Use only when indicated and remove early","Disconnect daily","Keep bag above bladder"],1,"Avoid unnecessary catheterisation, remove early and maintain a closed system."],
+["n20","nurse","Leadership & Ethics","A nurse discovers a medication error after administration. What comes first?",["Alter the record","Assess the patient and take safety action","Wait for next shift","Post online"],1,"Patient assessment and harm reduction precede notification and incident reporting."],
 ];
-
-export const examTracks = [
-  { slug: "pharmacist", title: "Gulf Pharmacist", subtitle: "DHA · DOH · MOHAP", questions: "450+ planned", time: "150 min mock", accent: "amber" },
-  { slug: "nurse", title: "Registered Nurse", subtitle: "DHA · DOH · MOHAP", questions: "450+ planned", time: "150 min mock", accent: "mint" },
+export const questions:Question[]=r.map(([id,profession,topic,stem,options,answer,explanation])=>({id,profession,topic,stem,options,answer,explanation}));
+export const examTracks=[
+ {slug:"pharmacist",title:"Gulf Pharmacist",subtitle:"DHA · DOH · MOHAP",questions:"20-question starter bank",time:"Timed mock mode",accent:"amber"},
+ {slug:"nurse",title:"Registered Nurse",subtitle:"DHA · DOH · MOHAP",questions:"20-question starter bank",time:"Timed mock mode",accent:"mint"},
 ] as const;
