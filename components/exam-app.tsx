@@ -2,7 +2,6 @@
 import { useEffect,useMemo,useState } from "react";
 import { ArrowLeft,ArrowRight,Bookmark,CheckCircle2,Clock3,RotateCcw,Target,Trophy,XCircle } from "lucide-react";
 import { Profession,Question,questions } from "@/lib/exams";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 type Mode="practice"|"mock";
 type Saved={attempts:number;best:number;answered:number};
@@ -18,7 +17,7 @@ export function ExamApp({profession}:{profession:Profession}){
 
  useEffect(()=>{const raw=localStorage.getItem(storageKey);if(raw)try{setSaved(JSON.parse(raw))}catch{}const marks=localStorage.getItem(`${storageKey}-bookmarks`);if(marks)try{setBookmarks(JSON.parse(marks))}catch{}const imported=localStorage.getItem("prometric-edge-custom-questions");if(imported)try{setCustomQuestions(JSON.parse(imported))}catch{}},[storageKey]);
  useEffect(()=>{if(!started||submitted||mode!=="mock")return;const timer=setInterval(()=>setSeconds(s=>{if(s<=1){clearInterval(timer);setSubmitted(true);return 0}return s-1}),1000);return()=>clearInterval(timer)},[started,submitted,mode]);
- useEffect(()=>{if(!submitted)return;const correct=session.filter(q=>answers[q.id]===q.answer).length,score=Math.round(correct/session.length*100);const next={attempts:saved.attempts+1,best:Math.max(saved.best,score),answered:saved.answered+session.length};setSaved(next);localStorage.setItem(storageKey,JSON.stringify(next));const supabase=getSupabaseBrowserClient();supabase?.auth.getUser().then(({data})=>{if(data.user)supabase.from("exam_attempts").insert({user_id:data.user.id,profession,mode,score,correct_answers:correct,total_questions:session.length,topic_filter:topic})});},[submitted]); // eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(!submitted)return;const correct=session.filter(q=>answers[q.id]===q.answer).length,score=Math.round(correct/session.length*100);const next={attempts:saved.attempts+1,best:Math.max(saved.best,score),answered:saved.answered+session.length};setSaved(next);localStorage.setItem(storageKey,JSON.stringify(next));},[submitted]); // eslint-disable-line react-hooks/exhaustive-deps
 
  function begin(){const filtered=topic==="All topics"?bank:bank.filter(q=>q.topic===topic);const shuffled=[...filtered].sort(()=>Math.random()-.5);const size=Math.min(count,shuffled.length);setSession(shuffled.slice(0,size));setSeconds(size*60);setIndex(0);setAnswers({});setSubmitted(false);setStarted(true)}
  function toggleBookmark(){if(!current)return;const next=bookmarks.includes(current.id)?bookmarks.filter(id=>id!==current.id):[...bookmarks,current.id];setBookmarks(next);localStorage.setItem(`${storageKey}-bookmarks`,JSON.stringify(next))}

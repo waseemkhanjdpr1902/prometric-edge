@@ -3,6 +3,7 @@ import "./globals.css";
 import "./fonts.css";
 import "./exam.css";
 import "./launch.css";
+import "./firebase.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prometric-edge.vercel.app"),

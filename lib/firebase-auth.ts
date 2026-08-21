@@ -1,0 +1,15 @@
+export type FirebaseSession={idToken:string;refreshToken:string;expiresAt:number;localId:string;email:string;emailVerified:boolean};
+type FirebaseResponse={idToken?:string;refreshToken?:string;expiresIn?:string;localId?:string;email?:string;users?:Array<{localId:string;email:string;emailVerified:boolean}>;error?:{message:string}};
+const key=process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+const sessionKey="prometric-edge-firebase-session";
+export const hasFirebaseConfig=Boolean(key&&process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN&&process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+const messages:Record<string,string>={EMAIL_EXISTS:"An account already exists for this email.",INVALID_LOGIN_CREDENTIALS:"The email or password is incorrect.",EMAIL_NOT_FOUND:"No account was found for this email.",INVALID_PASSWORD:"The email or password is incorrect.",WEAK_PASSWORD:"Use a stronger password with at least six characters.",TOO_MANY_ATTEMPTS_TRY_LATER:"Too many attempts. Please wait and try again.",USER_DISABLED:"This account has been disabled."};
+async function request(endpoint:string,payload:Record<string,unknown>){if(!key)throw new Error("Firebase configuration is missing.");const response=await fetch(`https://identitytoolkit.googleapis.com/v1/${endpoint}?key=${key}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const data:FirebaseResponse=await response.json();if(!response.ok)throw new Error(messages[data.error?.message||""]||data.error?.message?.replaceAll("_"," ")||"Authentication failed.");return data}
+async function lookup(idToken:string){const data=await request("accounts:lookup",{idToken});return data.users?.[0]}
+function save(data:FirebaseResponse,verified:boolean){const session:FirebaseSession={idToken:data.idToken!,refreshToken:data.refreshToken!,expiresAt:Date.now()+Number(data.expiresIn||3600)*1000,localId:data.localId!,email:data.email!,emailVerified:verified};localStorage.setItem(sessionKey,JSON.stringify(session));return session}
+export async function createAccount(email:string,password:string){const data=await request("accounts:signUp",{email,password,returnSecureToken:true});await request("accounts:sendOobCode",{requestType:"VERIFY_EMAIL",idToken:data.idToken});save(data,false);return data}
+export async function signIn(email:string,password:string){const data=await request("accounts:signInWithPassword",{email,password,returnSecureToken:true});const user=await lookup(data.idToken!);return save(data,Boolean(user?.emailVerified))}
+export async function resendVerification(){const session=getFirebaseSession();if(!session)throw new Error("Sign in again to resend verification.");await request("accounts:sendOobCode",{requestType:"VERIFY_EMAIL",idToken:session.idToken})}
+export async function sendPasswordReset(email:string){await request("accounts:sendOobCode",{requestType:"PASSWORD_RESET",email})}
+export function getFirebaseSession():FirebaseSession|null{if(typeof window==="undefined")return null;const raw=localStorage.getItem(sessionKey);if(!raw)return null;try{return JSON.parse(raw)}catch{return null}}
+export function signOut(){localStorage.removeItem(sessionKey)}

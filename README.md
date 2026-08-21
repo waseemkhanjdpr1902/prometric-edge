@@ -8,7 +8,8 @@ Mobile-first healthcare licensing exam preparation for DHA, DOH and MOHAP candid
 - Free diagnostic practice with immediate answer explanations
 - Results and readiness feedback
 - Responsive PWA-ready interface
-- Environment placeholders for Supabase and Razorpay
+- Firebase Email/Password authentication with verification and password reset
+- Environment placeholders for Firebase and Razorpay
 
 ## Local development
 
@@ -21,14 +22,13 @@ Copy `.env.example` to `.env.local` before enabling authentication or payments.
 
 ## Production setup
 
-1. Create a Supabase project and run `supabase/schema.sql` in its SQL Editor.
-2. Add the Supabase URL and anon key to Vercel.
-3. In Supabase Auth URL Configuration, set the production site URL and add
-   `https://YOUR-DOMAIN/auth/callback` as an allowed redirect URL.
-4. Enable Google auth only after adding the matching Google OAuth credentials.
+1. Create a Firebase project and register a Web app.
+2. In Firebase Authentication, enable the Email/Password provider.
+3. Add the six public Firebase Web configuration values from `.env.example` to Vercel.
+4. In Firebase Authentication settings, add the production Vercel/domain hostname to Authorized domains.
 5. Keep Razorpay variables empty until paid access and the reviewed content bank are ready.
 
-The application remains usable without Supabase using local browser progress.
+Study progress remains stored locally in the browser in this release.
 
 ## Disclaimer
 
