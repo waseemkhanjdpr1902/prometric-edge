@@ -45,6 +45,6 @@ const r:Row[]=[
 ];
 export const questions:Question[]=r.map(([id,profession,topic,stem,options,answer,explanation])=>({id,profession,topic,stem,options,answer,explanation}));
 export const examTracks=[
- {slug:"pharmacist",title:"Gulf Pharmacist",subtitle:"DHA · DOH · MOHAP",questions:"20-question starter bank",time:"Timed mock mode",accent:"amber"},
- {slug:"nurse",title:"Registered Nurse",subtitle:"DHA · DOH · MOHAP",questions:"20-question starter bank",time:"Timed mock mode",accent:"mint"},
+ {slug:"pharmacist",title:"Gulf Pharmacist",subtitle:"DHA · DOH · MOHAP",questions:"20 questions live",targetQuestions:450,time:"Timed mock mode",accent:"amber"},
+ {slug:"nurse",title:"Registered Nurse",subtitle:"DHA · DOH · MOHAP",questions:"20 questions live",targetQuestions:450,time:"Timed mock mode",accent:"mint"},
 ] as const;
