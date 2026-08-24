@@ -49,7 +49,20 @@ const r:Row[]=[
 ["n20","nurse","Quality & Accountability","A nurse discovers that the wrong dose was administered 20 minutes earlier. What should happen FIRST?",["Alter the medication record","Assess the patient and take immediate safety actions, then notify and report according to policy","Wait until shift change","Ask a colleague to accept responsibility"],1,"Patient assessment and harm mitigation come first. Transparent escalation, documentation and incident reporting follow.","Analysis","Post-error response"]
 ];
 
-export const questions:Question[]=r.map(([id,profession,topic,stem,options,answer,explanation,level,skill])=>({id,profession,topic,stem,options,answer,explanation,level,skill}));
+const rawQuestions:Question[]=r.map(([id,profession,topic,stem,options,answer,explanation,level,skill])=>({id,profession,topic,stem,options,answer,explanation,level,skill}));
+
+const normalize=(value:string)=>value.toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const ids=new Set<string>();
+const stems=new Set<string>();
+for(const question of rawQuestions){
+ if(ids.has(question.id)) throw new Error(`Duplicate question id: ${question.id}`);
+ const fingerprint=`${question.profession}:${normalize(question.stem)}`;
+ if(stems.has(fingerprint)) throw new Error(`Duplicate question stem: ${question.id}`);
+ if(question.options.length!==4) throw new Error(`Question must have four options: ${question.id}`);
+ if(question.answer<0||question.answer>=question.options.length) throw new Error(`Invalid answer index: ${question.id}`);
+ ids.add(question.id);stems.add(fingerprint);
+}
+export const questions:Question[]=rawQuestions;
 
 export const examTracks=[
  {slug:"pharmacist",title:"Gulf Pharmacist",subtitle:"DHA · DOH · MOHAP",questions:"20 simulation questions live",targetQuestions:450,time:"Timed simulation mode",accent:"amber"},
